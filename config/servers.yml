@@ -1,0 +1,6 @@
+servers:
+  - name: sqlserver_1
+    host: sqlserver
+    port: 1433
+    username: sa
+    password: ${MSSQL_PASS_1}

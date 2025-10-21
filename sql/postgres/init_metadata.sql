@@ -31,6 +31,31 @@ CREATE TABLE IF NOT EXISTS schemas (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tables in each schema
+CREATE TABLE IF NOT EXISTS tables (
+    id SERIAL PRIMARY KEY,
+    schema_id INTEGER REFERENCES schemas(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(schema_id, name)
+);
+
+-- Columns for each table
+CREATE TABLE IF NOT EXISTS columns (
+    id SERIAL PRIMARY KEY,
+    table_id INTEGER REFERENCES tables(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    data_type VARCHAR(100) NOT NULL,
+    max_length INTEGER,
+    is_nullable BOOLEAN DEFAULT true,
+    is_primary_key BOOLEAN DEFAULT false,
+    is_foreign_key BOOLEAN DEFAULT false,
+    default_value TEXT,
+    ordinal_position INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(table_id, name)
+);
+
 -- ==============================
 -- Query Logs table
 -- ==============================
@@ -41,10 +66,3 @@ CREATE TABLE IF NOT EXISTS query_logs (
     execution_time_ms INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- ==============================
--- Optional: Seed initial server entries
--- ==============================
-INSERT INTO servers (name, host, port, username, encrypted_password)
-SELECT 'local_sqlserver', 'sqlserver', 1433, 'sa', 'YourStrong!Passw0rd'
-WHERE NOT EXISTS (SELECT 1 FROM servers WHERE name='local_sqlserver');

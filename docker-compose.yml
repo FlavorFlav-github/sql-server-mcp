@@ -5,40 +5,41 @@ services:
     build: .
     container_name: mcp-server
     depends_on:
-      - postgres
-      - redis
-      - sqlserver
+      init-db:
+        condition: service_completed_successfully
     env_file:
       - .env
     environment:
-      # Basic config overrides
-      POSTGRES_DSN: postgresql://mcp_user:mcp_pass@postgres:5432/mcp_meta
-      REDIS_URL: redis://redis:6379/0
-      SQLSERVER_DSN: Driver={ODBC Driver 18 for SQL Server};Server=sqlserver,1433;Database=master;Uid=sa;Pwd=YourStrong!Passw0rd;Encrypt=no
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      REDIS_URL: redis://${REDIS_HOST}:${REDIS_PORT}/0
+      SQLSERVER_DSN: Driver={ODBC Driver 18 for SQL Server};Server=${SQLSERVER_HOST},${SQLSERVER_PORT};Database=${SQLSERVER_DB};Uid=${SQLSERVER_USER};Pwd=${SQLSERVER_PASSWORD};Encrypt=no
       APP_ENV: development
       LOG_LEVEL: info
       PYTHONPATH: /app/src
+      MSSQL_PASS_1: ${MSSQL_PASS_1}
     ports:
-      - "8080:8080"
+      - "${MCP_SERVER_PORT}:8080"
     volumes:
       - ./src:/app/src
       - ./sql:/app/sql
+      - ./config:/app/config
     restart: on-failure
 
   postgres:
     image: postgres:16
     container_name: postgres
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: mcp_user
-      POSTGRES_PASSWORD: mcp_pass
-      POSTGRES_DB: mcp_meta
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
-      - ./sql/postgres:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "mcp_user", "-d", "mcp_meta"]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
       interval: 10s
       retries: 5
 
@@ -46,7 +47,7 @@ services:
     image: redis:7-alpine
     container_name: redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redisdata:/data
     command: ["redis-server", "--appendonly", "yes"]
@@ -58,19 +59,39 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
+    env_file:
+      - .env
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+      MSSQL_SA_PASSWORD: ${SQLSERVER_PASSWORD}
       MSSQL_PID: "Developer"
     ports:
-      - "1433:1433"
+      - "${SQLSERVER_PORT}:1433"
     volumes:
       - sqlserverdata:/var/opt/mssql
       - ./sql:/sql
     healthcheck:
-      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YourStrong!Passw0rd -Q "SELECT 1" -C
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U ${SQLSERVER_USER} -P ${SQLSERVER_PASSWORD} -Q "SELECT 1" -C
       interval: 20s
       retries: 10
+
+  init-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.init
+    container_name: init-db
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - ./scripts/init-db.sh:/scripts/init-db.sh
+      - ./sql:/sql
+    entrypoint: ["/bin/bash", "/scripts/init-db.sh"]
+    restart: "no"
 
 volumes:
   pgdata:

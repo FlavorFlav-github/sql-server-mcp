@@ -22,18 +22,22 @@ help:
 build:
 	$(DOCKER_COMPOSE) build
 
+.PHONY: up_build
+up:
+	$(DOCKER_COMPOSE) --profile app up --build
+
 .PHONY: up
 up:
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) --profile app up
 
 .PHONY: down
 down:
-	$(DOCKER_COMPOSE) down -v
+	$(DOCKER_COMPOSE) --profile app down
 
 .PHONY: restart
 restart:
-	$(DOCKER_COMPOSE) down -v
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) --profile app down -v
+	$(DOCKER_COMPOSE) --profile app up -d
 
 .PHONY: logs
 logs:
@@ -47,10 +51,9 @@ psql:
 sqlcmd:
 	@docker exec -it sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -C
 
-.PHONY: seed
+.PHONY: init_db
 seed:
-	@chmod +x ./init-db.sh
-	@./init-db.sh
+	@set -a && . .env && set +a && ./scripts/init-db.sh
 
 .PHONY: init_metadata
 init_metadata:
