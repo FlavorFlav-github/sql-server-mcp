@@ -1,8 +1,22 @@
 # MCP Server
 
-Multi-Connection Platform (MCP) is a generic service designed to connect to multiple SQL Server instances, manage metadata in PostgreSQL, and provide a scalable foundation for multi-server, multi-database, multi-schema environments.
+Model Context Protocol (MCP) is a framework designed to manage and standardize metadata across multiple database servers.
 
-This project is containerized with Docker Compose, supports initialization scripts, and provides convenient commands via a Makefile.
+This project implements an MCP server that specifically supports Microsoft SQL Server environments, allowing you to:
+
+- Connect to multiple SQL Server instances
+
+- Handle multiple databases per server
+
+- Handle multiple schemas per database
+
+- Maintain a centralized metadata store in PostgreSQL
+
+- Provide a scalable foundation for querying and managing schemas, tables, and columns across all connected servers
+
+The goal of this project is to provide a generic, maintainable, and extensible MCP server that can serve as a backbone for multi-server, multi-database, multi-schema SQL Server environments.
+
+_This project is containerized with Docker Compose, supports initialization scripts, and provides convenient commands via a Makefile._
 
 ## 🚀 Features
 
