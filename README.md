@@ -95,12 +95,13 @@ MSSQL_PASS_1=<YourPassword>
 
 The project runs four main services:
 
-|Service |	Description |
-|mcp-server |	MCP FastAPI server, metadata sync, API endpoints |
-|postgres |	PostgreSQL metadata store |
-|redis |	Redis caching |
-|sqlserver |	Local SQL Server for testing |
-|init-db |	Database seeding script (runs once on startup) |
+| Service |	Description |
+|---------|-------------|
+| mcp-server |	MCP FastAPI server, metadata sync, API endpoints |
+| postgres |	PostgreSQL metadata store |
+| redis |	Redis caching |
+| sqlserver |	Local SQL Server for testing |
+| init-db |	Database seeding script (runs once on startup) |
 
 Start all services:
 ```bash
@@ -118,17 +119,19 @@ Tail MCP server logs:
 make logs
 ```
 ## 📝 Makefile Commands
-|Command |	Description |
-|make build |	Build Docker images |
-|make up |	Start all containers |
-|make down |	Stop all containers |
-|make restart |	Restart all containers and volumes |
-|make logs |	Tail MCP server logs |
-|make psql |	Open PostgreSQL interactive shell |
-|make sqlcmd |	Open SQL Server interactive shell |
-|make seed |	Run DB seeding (init-db.sh) |
-|make init_metadata |	Run MCP metadata initialization |
-⚡ Metadata Initialization
+| Command |	Description |
+|---------|-------------|
+| make build |	Build Docker images |
+| make up |	Start all containers |
+| make down |	Stop all containers |
+| make restart |	Restart all containers and volumes |
+| make logs |	Tail MCP server logs |
+| make psql |	Open PostgreSQL interactive shell |
+| make sqlcmd |	Open SQL Server interactive shell |
+| make seed |	Run DB seeding (init-db.sh) |
+| make init_metadata |	Run MCP metadata initialization |
+
+## ⚡ Metadata Initialization
 
 After starting containers, initialize the metadata store:
 ```bash
@@ -156,17 +159,18 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 
 - Store the key in .env as ENCRYPTION_KEY
 
-## 📌 Next Steps / Phases
+## 🗓 High-Level Timeline / Roadmap
 
-Phase 2.2: ORM layer with SQLAlchemy + Alembic migrations
+| Phase | Description | Deliverables | Status |
+|-------|-------------|-------------|--------|
+| ⚙️ **Phase 1** | Foundations & Environment Setup | Docker Compose, project scaffolding, config & secrets management | ✅ Completed |
+| 🧩 **Phase 2** | Metadata Registry (PostgreSQL) | Schema design, ORM, metadata API, discovery job, health monitor, tagging | 2.1 Completed, 2.3 Completed, others Next |
+| ⚡ **Phase 3** | Cache Layer (Redis) | Metadata cache, query result cache, invalidation, metrics | 🔜 Next |
+| 🧠 **Phase 4** | Core Query Execution Engine | Query planner, connection manager, dispatcher, executor, result aggregator, normalizer, circuit breaker, observability | 🔜 Next |
+| 🌐 **Phase 5** | MCP API Layer | API server, request validation, auth/ACL, streaming, error handling | 🔜 Next |
+| 🧩 **Phase 6** | Observability & Admin Tools | Metrics, logging, tracing, admin UI, CLI tools | 🔜 Next |
+| 🧪 **Phase 7** | Testing & QA | Unit, integration, load, fault injection, performance tuning | 🔜 Next |
 
-Phase 2.4: API endpoints via FastAPI for CRUD on metadata
-
-Phase 3: Multi-server multi-database introspection
-
-Phase 4: Redis caching for metadata queries
-
-Phase 5: Secret manager integration (AWS/GCP/Azure)
 
 ## 💡 Tips
 
